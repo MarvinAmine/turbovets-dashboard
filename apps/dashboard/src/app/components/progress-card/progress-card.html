@@ -1,0 +1,9 @@
+<div class="card">
+  <div class="text-sm text-gray-500 mb-2">Progress</div>
+  <div class="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden">
+    <div class="h-2 bg-brand-600 transition-all" [style.width.%]="pct"></div>
+  </div>
+  <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+    {{ doneCount }} / {{ totalCount }} done ({{ pct | number:'1.0-0' }}%)
+  </div>
+</div>

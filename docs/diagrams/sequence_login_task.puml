@@ -1,0 +1,50 @@
+@startuml
+skinparam shadowing false
+autonumber
+
+actor UI as "Angular Dashboard"
+participant API as "NestJS API"
+database DB as "Database"
+participant JWT as "JWT Service"
+
+' ============================
+' Login flow
+' ============================
+UI -> API : POST /auth/login { email, password }
+API -> DB : SELECT user WHERE email=?
+DB --> API : user row (hash, orgId, roles)
+API -> API : bcrypt.compare()
+API -> JWT : sign({ sub, email, orgId, roles })
+JWT --> API : accessToken
+API --> UI : 200 { accessToken }
+
+' ============================
+' Authorized task list (org-scoped)
+' ============================
+UI -> API : GET /tasks (Authorization: Bearer <token>)
+API -> API : JwtAuthGuard validates token
+API -> API : RbacGuard can("read:any")
+API -> DB : SELECT * FROM tasks WHERE org_id = token.orgId ORDER BY created_at DESC
+DB --> API : rows
+API --> UI : 200 [tasks]
+
+' ============================
+' Create task with audit
+' ============================
+UI -> API : POST /tasks { title, ... } (Bearer token)
+API -> API : JwtAuthGuard + RbacGuard can("create:any")
+API -> DB : INSERT task (orgId=token.orgId, ownerId=token.sub)
+DB --> API : inserted row
+API -> API : AuditInterceptor logs { actor: token.email, orgId, method, url }
+API --> UI : 201 { task }
+
+' ============================
+' Read audit-log (OWNER/ADMIN)
+' ============================
+UI -> API : GET /audit-log?last=50 (Bearer token)
+API -> API : JwtAuthGuard + RbacGuard can("read:audit")
+API -> DB : SELECT last 50 entries (or read from log store)
+DB --> API : entries
+API --> UI : 200 [audit lines]
+
+@enduml

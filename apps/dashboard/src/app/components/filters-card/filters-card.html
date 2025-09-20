@@ -1,0 +1,12 @@
+<div class="card">
+  <div class="text-sm text-gray-500 mb-2">Filters</div>
+  <div class="flex gap-2">
+    <input
+      class="input"
+      placeholder="Category..."
+      [value]="category"
+      (input)="onCategoryInput($event)"
+    />
+    <button class="btn-ghost" (click)="clear.emit()">Clear</button>
+  </div>
+</div>

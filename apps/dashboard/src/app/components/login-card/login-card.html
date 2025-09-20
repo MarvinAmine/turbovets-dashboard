@@ -1,0 +1,9 @@
+<section class="max-w-md mx-auto card">
+  <h2 class="text-lg font-semibold mb-3">Sign in</h2>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-3">
+    <input class="input" placeholder="Email" formControlName="email" />
+    <input class="input" type="password" placeholder="Password" formControlName="password" />
+    <button class="btn w-full" [disabled]="form.invalid || loading">Login</button>
+    <div *ngIf="error" class="text-sm text-red-600">{{ error }}</div>
+  </form>
+</section>

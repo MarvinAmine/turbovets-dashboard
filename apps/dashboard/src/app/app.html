@@ -1,0 +1,47 @@
+<div class="min-h-screen">
+  <app-top-bar
+    [search]="tasks.search()"
+    [statusFilter]="tasks.statusFilter()"
+    [sortBy]="tasks.sortBy()"
+    [isDark]="isDark()"
+    [authed]="auth.isAuthed()"
+    (searchChange)="setSearch($event)"
+    (statusFilterChange)="setStatusFilter($event)"
+    (sortByChange)="setSortBy($event)"
+    (toggleTheme)="toggleTheme()"
+    (logout)="logout()"
+  ></app-top-bar>
+
+  <main class="mx-auto max-w-6xl px-4 py-6 space-y-6">
+    <app-login-card
+      *ngIf="!auth.isAuthed()"
+      [loading]="loading()"
+      [error]="error()"
+      (login)="onLogin($event)"
+    ></app-login-card>
+
+    <section *ngIf="auth.isAuthed()" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <app-quick-create [loading]="loading()" (create)="onCreate($event)"></app-quick-create>
+        <app-progress-card [doneCount]="doneCount()" [totalCount]="totalCount()"></app-progress-card>
+        <app-filters-card
+          [category]="tasks.category()"
+          (categoryChange)="setCategory($event)"
+          (clear)="clearFilters()"
+        ></app-filters-card>
+      </div>
+
+      <div cdkDropListGroup class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <app-kanban-column
+          *ngFor="let col of columns"
+          [label]="col.label"
+          [statusKey]="col.key"
+          [tasks]="column(col.key)()"
+          (statusChange)="setStatus($event.task, $event.status)"
+          (remove)="remove($event)"
+          (dropped)="onDropped($event)"
+        ></app-kanban-column>
+      </div>
+    </section>
+  </main>
+</div>

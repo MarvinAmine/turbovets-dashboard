@@ -1,0 +1,32 @@
+<article *ngFor="let t of tasks" cdkDrag class="card select-none">
+  <!-- Normal card content -->
+  <div class="flex items-center justify-between">
+    <div class="font-medium">{{ t.title }}</div>
+    <span class="badge border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300">
+      {{ t.status }}
+    </span>
+  </div>
+  <div class="text-xs text-gray-500 mt-1" *ngIf="t.category">#{{ t.category }}</div>
+
+  <div class="mt-3 flex gap-2">
+    <button class="btn-ghost" (click)="setStatus(t, 'IN_PROGRESS')" *ngIf="t.status !== 'IN_PROGRESS'">In Progress</button>
+    <button class="btn-ghost" (click)="setStatus(t, 'DONE')" *ngIf="t.status !== 'DONE'">Done</button>
+    <button class="btn-ghost text-red-600" (click)="remove.emit(t)">Delete</button>
+  </div>
+
+  <ng-template cdkDragPreview>
+    <article class="card select-none opacity-90">
+      <div class="flex items-center justify-between">
+        <div class="font-medium">{{ t.title }}</div>
+        <span class="badge border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300">
+          {{ t.status }}
+        </span>
+      </div>
+      <div class="text-xs text-gray-500 mt-1" *ngIf="t.category">#{{ t.category }}</div>
+    </article>
+  </ng-template>
+
+  <ng-template cdkDragPlaceholder>
+    <article class="card select-none bg-gray-800 opacity-50 h-20"></article>
+  </ng-template>
+</article>

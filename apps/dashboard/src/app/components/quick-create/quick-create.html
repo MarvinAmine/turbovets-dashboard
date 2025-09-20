@@ -1,0 +1,8 @@
+<div class="card">
+  <div class="text-sm text-gray-500 mb-2">Create a new task (N)</div>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="flex gap-2">
+    <input class="input" placeholder="Task title" formControlName="title" />
+    <input class="input w-40" placeholder="Category" formControlName="category" />
+    <button class="btn" [disabled]="form.invalid || loading">Create</button>
+  </form>
+</div>

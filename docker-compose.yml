@@ -1,0 +1,76 @@
+services:
+  db:
+    image: postgres:16-alpine
+    init: true
+    container_name: turbovets_db_dev
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-turbovets}
+      POSTGRES_USER: ${POSTGRES_USER:-turbovets}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-turbovets}
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-turbovets} -d ${POSTGRES_DB:-turbovets}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    init: true
+    container_name: turbovets_redis_dev
+    command: ["redis-server", "--appendonly", "no"]
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api-dev:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: turbovets_api_dev
+    working_dir: /workspace
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: ${DATABASE_URL:-postgres://turbovets:turbovets@db:5432/turbovets}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      JWT_SECRET: ${JWT_SECRET:-change-me}
+    command: >
+      sh -c "
+        echo 'Running migrations...' &&
+        node dist/typeorm.config.js migration:run &&
+        echo 'Seeding database...' &&
+        node dist/seed/run-seed.js &&
+        echo 'Starting NestJS app...' &&
+        node dist/main.js
+      "
+
+    volumes:
+      - ./apps/api:/workspace/apps/api
+    ports:
+      - "3001:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+
+  dashboard-dev:
+    build:
+      context: .
+      dockerfile: apps/dashboard/Dockerfile
+    container_name: turbovets_dashboard_dev
+    ports:
+      - "4200:8080"   # map Nginx 8080 → host 4200
+    depends_on:
+      - api-dev
+
+volumes:
+  turbovets_node_modules:
+  turbovets_dashboard_node_modules:

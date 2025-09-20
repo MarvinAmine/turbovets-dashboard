@@ -1,0 +1,171 @@
+@startuml
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+' ============================
+' Modules
+' ============================
+class AppModule
+class AuthModule
+class UsersModule
+class OrgModule
+class TasksModule
+class AuditModule
+
+' ============================
+' Auth
+' ============================
+package "Auth" {
+  class AuthController
+  class AuthService
+  class JwtStrategy
+  class JwtAuthGuard
+}
+
+' ============================
+' DTOs (API contracts)
+' ============================
+package "DTOs" {
+  class LoginDto {
+    +email: string
+    +password: string
+  }
+  class CreateTaskDto {
+    +title: string
+    +description?: string
+    +category?: string
+  }
+  class UpdateTaskDto {
+    +title?: string
+    +description?: string
+    +status?: TaskStatus
+    +assigneeId?: number
+  }
+  class TaskResponseDto {
+    +id: number
+    +title: string
+    +status: TaskStatus
+    +ownerId: number
+    +assigneeId?: number
+  }
+}
+
+' ============================
+' Entities
+' ============================
+package "Entities" {
+  class User {
+    +id: number
+    +email: string
+    +passwordHash: string
+    +displayName: string
+    +orgId: number
+  }
+  class Role {
+    +id: number
+    +name: string
+  }
+  class Permission {
+    +id: number
+    +action: string
+    +resource: string
+  }
+  class UserRole {
+    +userId: number
+    +roleId: number
+  }
+  class RolePermission {
+    +roleId: number
+    +permissionId: number
+  }
+  class Organization {
+    +id: number
+    +name: string
+    +parentId?: number
+  }
+  class Task {
+    +id: number
+    +title: string
+    +description?: string
+    +category?: string
+    +status: string
+    +orgId: number
+    +ownerId: number
+    +assigneeId?: number
+    +createdAt: Date
+    +updatedAt: Date
+  }
+}
+
+' ============================
+' Services / Controllers
+' ============================
+package "Users" {
+  class UsersService
+}
+
+package "Organizations" {
+  class OrganizationsController
+  class OrgService
+}
+
+package "Tasks" {
+  class TasksController
+  class TasksService
+  class AuditInterceptor
+}
+
+package "Audit" {
+  class AuditController
+  class AuditService
+}
+
+package "RBAC" {
+  class RbacGuard
+  class RolesDecorator
+  class OrgScopedDecorator
+  class Policy
+}
+
+' ============================
+' Module wiring
+' ============================
+AppModule --> AuthModule
+AppModule --> UsersModule
+AppModule --> OrgModule
+AppModule --> TasksModule
+AppModule --> AuditModule
+
+AuthModule --> AuthController
+AuthModule --> AuthService
+AuthModule --> JwtStrategy
+AuthModule --> JwtAuthGuard
+
+UsersModule --> UsersService
+OrgModule --> OrganizationsController
+OrgModule --> OrgService
+TasksModule --> TasksController
+TasksModule --> TasksService
+TasksModule --> AuditInterceptor
+AuditModule --> AuditController
+AuditModule --> AuditService
+
+' ============================
+' Dependencies & usage
+' ============================
+AuthService --> UsersService
+TasksController ..> JwtAuthGuard
+TasksController ..> RbacGuard
+TasksController --> CreateTaskDto
+TasksController --> UpdateTaskDto
+AuthController --> LoginDto
+RbacGuard ..> RolesDecorator
+RbacGuard ..> OrgScopedDecorator
+RbacGuard ..> Policy
+AuditInterceptor --> AuditService
+
+UsersService --> User
+OrgService --> Organization
+TasksService --> Task
+
+@enduml

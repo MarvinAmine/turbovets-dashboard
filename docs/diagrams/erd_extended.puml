@@ -1,0 +1,137 @@
+@startuml
+skinparam shadowing false
+hide circle
+skinparam classAttributeIconSize 0
+
+' ============================
+' Extended Entity–Relationship Diagram
+' ============================
+
+entity "Organizations" as Org {
+  * id : int <<PK>>
+  --
+  name : string
+  parent_id : int <<FK>>  ' nullable (two-level hierarchy)
+}
+
+entity "Users" as User {
+  * id : int <<PK>>
+  --
+  email : string <<UK>>
+  password_hash : string
+  display_name : string
+  org_id : int <<FK>>
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity "Roles" as Role {
+  * id : int <<PK>>
+  --
+  name : string <<UK>>      ' OWNER | ADMIN | VIEWER
+  description : string
+}
+
+entity "Permissions" as Perm {
+  * id : int <<PK>>
+  --
+  action : string           ' read:any | create:any | update:any | delete:any | read:audit
+  resource : string         ' task | audit-log | ...
+}
+
+entity "UserRoles" as UR {
+  * user_id : int <<PK,FK>>
+  * role_id : int <<PK,FK>>
+}
+
+entity "RolePermissions" as RP {
+  * role_id : int <<PK,FK>>
+  * perm_id : int <<PK,FK>>
+}
+
+entity "Tasks" as Task {
+  * id : int <<PK>>
+  --
+  title : string
+  description : string
+  category : string
+  status : enum              ' TODO | IN_PROGRESS | DONE
+  org_id : int <<FK>>
+  owner_id : int <<FK>>      ' creator
+  assignee_id : int <<FK>>   ' nullable
+  created_at : datetime
+  updated_at : datetime
+}
+
+' ============================
+' Relationships (with intents)
+' ============================
+Org  "1" -- "0..*" User : has\n(on delete: cascade)
+Org  "1" -- "0..*" Task : has\n(on delete: cascade)
+
+User "1" -- "0..*" UR
+Role "1" -- "0..*" UR
+Role "1" -- "0..*" RP
+Perm "1" -- "0..*" RP
+
+User "1" -- "0..*" Task : owns (owner_id)
+User "1" -- "0..*" Task : assigned (assignee_id, nullable)
+
+@enduml
+
+File 4: /TurboVets/docs/diagrams/sequence_login_task.puml
+
+@startuml
+skinparam shadowing false
+autonumber
+
+actor UI as "Angular Dashboard"
+participant API as "NestJS API"
+database DB as "Database"
+participant JWT as "JWT Service"
+
+' ============================
+' Login flow (normalized roles)
+' ============================
+UI -> API : POST /auth/login { email, password }
+API -> DB : SELECT u.*, r.name\nFROM users u\nJOIN user_roles ur ON u.id = ur.user_id\nJOIN roles r ON ur.role_id = r.id\nWHERE u.email = ?
+DB --> API : user + [roles]
+API -> API : bcrypt.compare()
+API -> JWT : sign({ sub, email, orgId, roles })
+JWT --> API : accessToken
+API --> UI : 200 { accessToken }
+
+' ============================
+' Authorized task list (org-scoped, role-aware)
+' ============================
+UI -> API : GET /tasks (Authorization: Bearer <token>)
+API -> API : JwtAuthGuard validates token
+API -> API : RbacGuard can('read:any' on task)
+alt role OWNER or ADMIN
+  API -> DB : SELECT * FROM tasks WHERE org_id = :orgId ORDER BY created_at DESC
+else role VIEWER
+  API -> DB : SELECT * FROM tasks WHERE org_id = :orgId AND assignee_id = :userId ORDER BY created_at DESC
+end
+DB --> API : rows
+API --> UI : 200 [tasks]
+
+' ============================
+' Create task with audit
+' ============================
+UI -> API : POST /tasks { title, ... } (Bearer)
+API -> API : JwtAuthGuard + RbacGuard can('create:any' on task)
+API -> DB : INSERT INTO tasks(..., org_id=:orgId, owner_id=:userId, assignee_id=:assigneeId)
+DB --> API : inserted row
+API -> API : AuditInterceptor logs { actor, orgId, method, url }
+API --> UI : 201 { task }
+
+' ============================
+' Read audit-log (OWNER/ADMIN)
+' ============================
+UI -> API : GET /audit-log?last=50 (Bearer)
+API -> API : JwtAuthGuard + RbacGuard can('read:audit')
+API -> DB : SELECT * FROM audit_log ORDER BY ts DESC LIMIT 50
+DB --> API : entries
+API --> UI : 200 [audit lines]
+
+@enduml

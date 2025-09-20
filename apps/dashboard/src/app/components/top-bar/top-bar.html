@@ -1,0 +1,46 @@
+<header class="sticky top-0 z-10 border-b border-gray-200/60 bg-white/80 dark:bg-gray-950/80 backdrop-blur">
+  <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="h-8 w-8 rounded-xl bg-brand-600"></div>
+      <div class="leading-tight">
+        <div class="text-sm text-gray-500">TurboVets</div>
+        <div class="font-semibold">Secure Task Manager</div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <div class="hidden md:flex items-center gap-2">
+        <input
+          class="input w-64"
+          placeholder="Search ( / )"
+          [value]="search"
+          (input)="onSearchInput($event)"
+        />
+
+        <select class="input w-40" [value]="statusFilter" (change)="onStatusChange($event)">
+          <option value="ALL">All statuses</option>
+          <option value="TODO">Todo</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="DONE">Done</option>
+        </select>
+
+        <select class="input w-36" [value]="sortBy" (change)="onSortChange($event)">
+          <option value="created">Newest</option>
+          <option value="title">Title (A→Z)</option>
+          <option value="status">Status</option>
+        </select>
+      </div>
+
+      <button
+        class="btn-ghost"
+        (click)="toggleTheme.emit()"
+        [attr.aria-label]="isDark ? 'Switch to light' : 'Switch to dark'"
+      >
+        <span *ngIf="!isDark">🌙</span>
+        <span *ngIf="isDark">☀️</span>
+      </button>
+
+      <button *ngIf="authed" class="btn-ghost" (click)="logout.emit()">Logout</button>
+    </div>
+  </div>
+</header>

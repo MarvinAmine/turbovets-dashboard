@@ -1,0 +1,80 @@
+# --------------------------------
+# Node.js / TypeScript
+# --------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
+
+# --------------------------------
+# Build outputs
+# --------------------------------
+dist/
+build/
+.cache/
+.tmp/
+
+# Angular build outputs
+apps/dashboard/.angular/
+apps/dashboard/coverage/
+apps/dashboard/dist/
+.angular/
+
+# Jest cache & coverage
+coverage/
+*.lcov
+.jest/
+
+# .nx
+.nx/
+
+# --------------------------------
+# Environment & config
+# --------------------------------
+.env
+.env.*
+!.env.example
+
+# Local configs
+*.local
+*.secret
+
+# --------------------------------
+# Logs & OS files
+# --------------------------------
+logs/
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# --------------------------------
+# Docker / Containers
+# --------------------------------
+*.pid
+*.seed
+*.pid.lock
+docker-compose.override.yml
+.docker/
+.dockerignore
+
+# --------------------------------
+# Editor / IDE
+# --------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --------------------------------
+# Misc
+# --------------------------------
+ts-node/

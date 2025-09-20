@@ -1,0 +1,57 @@
+@startuml
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+actor User
+
+cloud "AWS Cloud" {
+  component R53 as "Route 53 (DNS)"
+  component CF as "CloudFront (SPA CDN)"
+  component S3 as "S3 (Angular SPA Hosting)"
+
+  component WAF as "AWS WAF"
+
+  node "VPC" {
+    frame "Public Subnets" {
+      component ALB as "Application Load Balancer (API)"
+    }
+    frame "Private Subnets" {
+      component ECS as "ECS Fargate (NestJS API)"
+      database RDS as "Amazon RDS PostgreSQL"
+      component Redis as "ElastiCache Redis"
+    }
+  }
+
+  component ECR as "Elastic Container Registry"
+  component GHA as "GitHub Actions (CI/CD)"
+  component SM as "Secrets Manager"
+  component CW as "CloudWatch Logs & Metrics"
+  component MSK as "MSK / Kafka (optional)"
+  component Rabbit as "Amazon MQ / RabbitMQ (optional)"
+}
+
+' --- Traffic & DNS
+User --> CF : HTTPS (spa.turbovets.example)
+R53 --> CF
+CF --> S3
+
+User --> WAF : HTTPS (api.turbovets.example)
+R53 --> WAF
+WAF --> ALB
+ALB --> ECS
+
+' --- App deps
+ECS --> RDS
+ECS --> Redis
+ECS ..> MSK
+ECS ..> Rabbit
+
+ECS --> CW
+ECS --> SM
+
+' --- CI/CD
+GHA --> ECR
+ECR --> ECS
+GHA ..> ECS : deploy
+
+@enduml

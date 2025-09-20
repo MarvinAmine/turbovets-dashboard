@@ -1,0 +1,32 @@
+{
+  "name": "api",
+  "projectType": "application",
+  "sourceRoot": "apps/api/src",
+  "targets": {
+    "serve": {
+      "executor": "@nx/nest:build",
+      "options": {
+        "outputPath": "dist/apps/api",
+        "main": "apps/api/src/main.ts",
+        "tsConfig": "apps/api/tsconfig.app.json"
+      }
+    },
+    "dev": {
+      "executor": "@nx/nest:serve",
+      "options": {
+        "buildTarget": "api:serve",
+        "watch": true
+      }
+    },
+    "build": {
+      "executor": "@nx/nest:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/api",
+        "main": "apps/api/src/main.ts",
+        "tsConfig": "apps/api/tsconfig.app.json",
+        "assets": ["apps/api/src/assets"]
+      }
+    }
+  }
+}
