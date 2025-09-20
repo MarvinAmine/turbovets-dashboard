@@ -1,24 +1,25 @@
 ## DONE:
 
-1- Read and browse on internet about the requirements  
-2- Analysed the solution using PlantUML diagrams  
-3- Created the basic global monorepo structure  
-4- Added the API backend on Next.js with:  
-   1- Linked the ORM  
-   2- Created the migrations with the models and the seeds to manage the roles, permissions and the tasks  
-   3- Configured and exposed the Postgres and Redis in the global Docker compose  
-   4- Exposed the APIs  
-   5- Implemented the JWT into a decorator (using passport-jwt and @nestjs/passport)  
-   6- Implemented the role-based access control RBAC  
-   7- Created some Jest tests  
-   8- Added the backend in the global Docker compose  
-5- Added the Frontend in Angular  
-   1- Created the basic Angular file structure  
-   2- Set tailwind configuration and themes  
-   3- Created the auth service interceptor  
-   4- Created the Task store and core services  
-   5- Created the components filters-card, kanban-column, login-card, progress-card, quick-create, top-bar (ts, html and specs)  
-   6- Added the frontend in the global Docker compose  
+1. Read and browse on internet about the requirements  
+2. Analysed the solution using PlantUML diagrams  
+3. Created the basic global monorepo structure  
+4. Added the API backend on Next.js with:  
+   4.1. Linked the ORM  
+   4.2. Created the migrations with the models and the seeds to manage the roles, permissions and the tasks  
+   4.3. Configured and exposed the Postgres and Redis in the global Docker compose  
+   4.4. Exposed the APIs  
+   4.5. Implemented the JWT into a decorator (using passport-jwt and @nestjs/passport)  
+   4.6. Implemented the role-based access control RBAC  
+   4.7. Created some Jest tests  
+   4.8. Added the backend in the global Docker compose  
+5. Added the Frontend in Angular  
+   5.1. Created the basic Angular file structure  
+   5.2. Set tailwind configuration and themes  
+   5.3. Created the auth service interceptor  
+   5.4. Created the Task store and core services  
+   5.5. Created the components filters-card, kanban-column, login-card, progress-card, quick-create, top-bar (ts, html and specs)  
+   5.6. Added the frontend in the global Docker compose  
+
 
 ---
 
